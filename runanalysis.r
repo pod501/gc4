@@ -1,13 +1,13 @@
 ## Download files from https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip
 ## Restore into c:\r\final
 ## Take test and train data and Merge into 1 data set.
-
+packages <- c("data.table", "reshape2")
 
 # Read names of 561 columns to be used as headers throughout process:
 features <-read.table("c:\\r\\final\\features.txt",header = FALSE)
 
 # The 6 activities are given numeric values
-activitys_labels <- read.table("c:\\r\\final\\activity_labels.txt", header = FALSE)
+activity_labels <- read.table("c:\\r\\final\\activity_labels.txt", header = FALSE)
 
 # x_test contains the readings
 # subject_test contains the subject values
@@ -40,8 +40,12 @@ both_data_sets = rbind(all_test_data, all_train_data)
 
 ## Give meaningful header names, removing leading t for time.
 
-names(both_data_sets) <- gsub("^t", "", names(both_data_sets))
+names(both_data_sets) <- gsub("^t", "Time", names(both_data_sets))
 
 aggdata <- aggregate(. ~Subject + Activity, both_data_sets, mean)
-write.table(aggdata, "c:\\r\\aggdata.txt", row.name=FALSE)
+
+## Change the index given for each activity to it's associated text label
+aggdata[, 2] = sapply(aggdata[, 2], function(x) activity_labels[x, 2])
+
+write.table(aggdata, "c:\\r\\aggdata.txt", sep="\t", row.name=FALSE)
 
